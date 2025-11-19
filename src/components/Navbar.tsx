@@ -78,13 +78,13 @@ export default function Navbar({ user, role }: { user: User | null, role: string
         w-full max-w-6xl
         bg-[#2F2F2F]/80 backdrop-blur-md 
         border border-white/10 shadow-xl
-        rounded-full 
+        ${isMobileMenuOpen ? 'rounded-[2rem]' : 'rounded-full'} 
         px-8 py-3      
 
         transition-all duration-500 ease-in-out
         ${isScrolled 
            ? 'py-2 max-w-4xl bg-[#212121]/95 shadow-2xl'
-           : 'py-5 bg-[#2F2F2F]/80'
+           : 'py-5 bg-[#2F2F2F]/90'
         }
       `}>
         <div className="flex items-center justify-between h-9">
@@ -201,11 +201,8 @@ export default function Navbar({ user, role }: { user: User | null, role: string
 
           {/* Burger Menu (Mobile) */}
           <div className="flex md:hidden items-center">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-1 text-gray-300 hover:text-white"
-            >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-1 text-gray-300 hover:text-white">
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
 
@@ -213,45 +210,40 @@ export default function Navbar({ user, role }: { user: User | null, role: string
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-3 pt-3 border-t border-white/10">
+          <div className="md:hidden mt-4 pt-4 border-t border-white/10 pb-2 animate-in slide-in-from-top-5 fade-in duration-200">
             <div className="flex flex-col space-y-1 px-1">
-              <Link href="/" className="block px-3 py-2 rounded-md text-sm font-medium text-white hover:bg-white/5">Home</Link>
-              <Link href="/order" className="block px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5">Order</Link>
+              <Link href="/" className="block px-3 py-3 rounded-xl text-sm font-medium text-white hover:bg-white/5">Home</Link>
+              <Link href="/order" className="block px-3 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5">Order Layanan</Link>
+              <Link href="/partners" className="block px-3 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5">Find Mitra</Link> {/* Link Mobile */}
               
+              {role === 'admin' && <Link href="/admin" className="block px-3 py-3 rounded-xl text-sm font-bold text-red-400 bg-red-500/10">Admin Panel</Link>}
+              {role === 'partner' && <Link href="/partner" className="block px-3 py-3 rounded-xl text-sm font-bold text-green-400 bg-green-500/10">Mitra Dashboard</Link>}
+              {role === 'user' && <Link href="/membership" className="block px-3 py-3 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5">Membership</Link>}
               
-              {/* Logic Role di Mobile Menu */}
-              {role === 'admin' && (
-                 <Link href="/admin" className="block px-3 py-2 rounded-md text-sm font-bold text-red-400 hover:bg-red-500/10">Admin Panel</Link>
-              )}
-              {role === 'partner' && (
-                 <Link href="/partner" className="block px-3 py-2 rounded-md text-sm font-bold text-green-400 hover:bg-green-500/10">Mitra Dashboard</Link>
-              )}
-              {role === 'user' && (
-                 <Link href="/membership" className="block px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5">Membership</Link>
-              )}
-              
-              <div className="pt-3 mt-2 border-t border-white/10">
+              <div className="pt-4 mt-2 border-t border-white/10">
                  {user ? (
                     <>
-                      <div className="flex items-center gap-3 px-3 py-2 bg-white/5 rounded-lg mb-2">
-                        <Image src={avatarUrl} alt="user" width={32} height={32} className="rounded-full" unoptimized />
+                      <div className="flex items-center gap-3 px-3 py-3 bg-white/5 rounded-xl mb-2">
+                        <Image src={avatarUrl} alt="user" width={36} height={36} className="rounded-full" unoptimized />
                         <div className="overflow-hidden">
                           <p className="text-sm font-bold text-white truncate">{displayName}</p>
                           <p className="text-xs text-gray-500 truncate">{user.email}</p>
                         </div>
                       </div>
-                      <Link href="/my-orders" className="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg mb-1">
-                         <div className="flex items-center gap-2"><ClipboardList size={16} /> Riwayat Pesanan</div>
+                      <Link href="/my-orders" className="flex items-center gap-3 px-3 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl mb-1">
+                         <ClipboardList size={18} /> Riwayat Pesanan
                       </Link>
-                      <button onClick={() => signOut()} className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2 rounded-lg">
-                         <LogOut size={16} /> Sign Out
+                      <Link href="/profile" className="flex items-center gap-3 px-3 py-3 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-xl mb-1">
+                         <UserIcon size={18} /> Edit Profile
+                      </Link>
+                      <button onClick={() => signOut()} className="w-full text-left px-3 py-3 text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-3 rounded-xl bg-red-500/5 mt-2">
+                         <LogOut size={18} /> Sign Out
                       </button>
                     </>
                  ) : (
-                   <Link href="/login" className="block w-full text-center bg-primary text-background font-bold py-2 rounded-full text-sm">Login to Continue</Link>
+                   <Link href="/login" className="block w-full text-center bg-primary text-background font-bold py-3 rounded-xl text-sm mt-2">Login to Continue</Link>
                  )}
               </div>
-
             </div>
           </div>
         )}
