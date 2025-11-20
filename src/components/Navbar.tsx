@@ -75,7 +75,7 @@ export default function Navbar({ user, role }: { user: User | null, role: string
   return (
     <div className="fixed top-5 left-0 right-0 z-50 flex justify-center px-4 transition-all duration-300">
       <nav className={`
-        w-full max-w-6xl
+        w-full max-w-5xl
         bg-[#2F2F2F]/80 backdrop-blur-md 
         border border-white/10 shadow-xl
         ${isMobileMenuOpen ? 'rounded-[2rem]' : 'rounded-full'} 
@@ -83,7 +83,7 @@ export default function Navbar({ user, role }: { user: User | null, role: string
 
         transition-all duration-500 ease-in-out
         ${isScrolled 
-           ? 'py-2 max-w-4xl bg-[#212121]/95 shadow-2xl'
+           ? 'py-2 max-w-6xl bg-[#212121]/95 shadow-2xl'
            : 'py-5 bg-[#2F2F2F]/90'
         }
       `}>
