@@ -18,6 +18,12 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "SmartHome",
   description: "Solusi perbaikan rumah terpercaya.",
+
+  icons: {
+    icon: '/imgs/Logo-tanpa-text.png', // Path ke logo Anda
+    // Opsional: Jika punya versi Apple Touch Icon
+    // apple: '/imgs/Logo-tanpa-text.png', 
+  },
 };
 
 export default async function RootLayout({
