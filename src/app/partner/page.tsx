@@ -3,17 +3,19 @@ import { createClient } from '../../../lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Power, MapPin, Calendar, CheckCircle, Clock, Settings, History, Wrench, User } from 'lucide-react';
+import { Power, MapPin, Calendar, CheckCircle, Clock, Settings, History, Wrench, User, Map } from 'lucide-react';
 import { toggleStatus, completeOrder } from './actions';
-import ChatButton from '@/components/ChatButton'; // <--- 1. IMPORT INI
+import ChatButton from '@/components/ChatButton';
 
-// ... (Definisi Tipe Data & Helper biarkan sama) ...
+// --- 1. DEFINISI TIPE DATA ---
 type Job = {
   id: string;
   created_at: string;
   status: string;
   scheduled_at: string;
   total_price: number;
+  latitude?: number;  // Koordinat untuk Maps
+  longitude?: number; // Koordinat untuk Maps
   order_details: {
     address?: string;
     notes?: string;
@@ -44,12 +46,21 @@ const formatRupiah = (price: number) => new Intl.NumberFormat('id-ID', { style: 
 export default async function PartnerDashboard() {
   const supabase = await createClient();
 
+  // 1. Cek User & Role
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
+  // 2. Ambil Data Partner Lengkap
   const { data: rawPartnerData } = await supabase
     .from('partners')
-    .select(`status, average_rating, bio, partner_skills (skills (name))`)
+    .select(`
+        status, 
+        average_rating, 
+        bio, 
+        partner_skills (
+            skills (name)
+        )
+    `)
     .eq('id', user.id)
     .single();
 
@@ -58,6 +69,7 @@ export default async function PartnerDashboard() {
   const partnerData = rawPartnerData as unknown as PartnerData;
   const isOnline = partnerData.status === 'open_for_work';
 
+  // 3. Ambil Pekerjaan AKTIF
   const { data: activeJobs } = await supabase
     .from('orders')
     .select(`*, services (name, image_url), profiles:user_id (full_name, phone_number)`)
@@ -65,6 +77,7 @@ export default async function PartnerDashboard() {
     .eq('status', 'in_progress')
     .returns<Job[]>();
 
+  // 4. Ambil Riwayat SELESAI
   const { data: historyJobs } = await supabase
     .from('orders')
     .select(`*, services (name, image_url), profiles:user_id (full_name, phone_number)`)
@@ -77,7 +90,7 @@ export default async function PartnerDashboard() {
     <div className="min-h-screen bg-background pt-32 pb-20 px-4">
       <div className="max-w-3xl mx-auto">
         
-        {/* ... (Header Dashboard, Info Profil, Statistik BIARKAN SAMA) ... */}
+        {/* --- HEADER DASHBOARD --- */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
             <div>
                 <h1 className="text-3xl font-bold text-white">Partner Area</h1>
@@ -96,6 +109,7 @@ export default async function PartnerDashboard() {
             </div>
         </div>
 
+        {/* --- INFO PROFIL & SKILL --- */}
         <div className="bg-[#2F2F2F] rounded-3xl border border-white/10 p-6 mb-10 shadow-lg">
             <div className="flex items-start gap-4 mb-4">
                 <div className="p-3 bg-primary/10 rounded-full text-primary"><User size={24} /></div>
@@ -117,6 +131,7 @@ export default async function PartnerDashboard() {
             </div>
         </div>
 
+        {/* --- STATISTIK --- */}
         <div className="grid grid-cols-3 gap-4 mb-10">
             <div className="bg-[#2F2F2F] p-4 rounded-2xl border border-white/5 text-center">
                 <p className="text-gray-400 text-xs uppercase font-bold">Rating</p>
@@ -142,6 +157,7 @@ export default async function PartnerDashboard() {
            {activeJobs?.map((job) => (
              <div key={job.id} className="bg-[#2F2F2F] rounded-3xl border-2 border-primary/30 overflow-hidden shadow-2xl relative">
                 
+                {/* Header Kartu Job */}
                 <div className="bg-white/5 p-6 border-b border-white/10 flex justify-between items-center">
                    <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-black relative overflow-hidden">
@@ -153,26 +169,42 @@ export default async function PartnerDashboard() {
                       </div>
                    </div>
                    
-                   {/* --- 2. TOMBOL CHAT DI SINI --- */}
+                   {/* Tombol Chat & Badge */}
                    <div className="flex items-center gap-3">
-                      <ChatButton orderId={job.id} /> {/* <-- Tombol Chat untuk Mitra */}
+                      <ChatButton orderId={job.id} />
                       <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-bold rounded-full">Berjalan</span>
                    </div>
-
                 </div>
                 
+                {/* Detail Job */}
                 <div className="p-6 space-y-4">
+                   {/* Lokasi */}
                    <div className="flex items-start gap-3">
                       <MapPin className="text-primary mt-1 flex-shrink-0" size={20} />
-                      <div>
-                        <p className="text-gray-400 text-xs uppercase font-bold">Lokasi</p>
+                      <div className="w-full">
+                        <p className="text-gray-400 text-xs uppercase font-bold">Lokasi Pelanggan</p>
                         <p className="text-white">{job.order_details?.address}</p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        
+                        {/* Tombol Buka Google Maps */}
+                        {job.latitude && job.longitude && (
+                           <a 
+                             href={`https://www.google.com/maps/dir/?api=1&destination=${job.latitude},${job.longitude}`}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="mt-2 inline-flex items-center gap-2 text-xs font-bold text-blue-400 bg-blue-500/10 px-3 py-2 rounded-lg hover:bg-blue-500/20 transition-colors"
+                           >
+                             <Map size={14} /> Buka Rute (Maps)
+                           </a>
+                        )}
+
+                        <p className="text-sm text-gray-500 mt-2 pt-2 border-t border-white/5">
                             Pelanggan: <span className="text-white font-medium">{job.profiles?.full_name}</span> 
                             {job.profiles?.phone_number && ` • ${job.profiles.phone_number}`}
                         </p>
                       </div>
                    </div>
+
+                   {/* Jadwal */}
                    <div className="flex items-start gap-3">
                       <Calendar className="text-primary mt-1 flex-shrink-0" size={20} />
                       <div>
@@ -181,6 +213,7 @@ export default async function PartnerDashboard() {
                       </div>
                    </div>
                    
+                   {/* Form Selesaikan Pekerjaan */}
                    <form action={completeOrder.bind(null, job.id)} className="pt-4">
                       <button className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-900/20">
                          <CheckCircle size={20} /> Selesaikan Pekerjaan
@@ -189,6 +222,7 @@ export default async function PartnerDashboard() {
                 </div>
              </div>
            ))}
+           
            {activeJobs?.length === 0 && (
              <div className="text-center py-8 border border-dashed border-white/10 rounded-2xl text-gray-500 text-sm">
                 Tidak ada pekerjaan aktif saat ini.
@@ -196,7 +230,7 @@ export default async function PartnerDashboard() {
            )}
         </div>
 
-        {/* ... (Bagian Riwayat Selesai BIARKAN SAMA) ... */}
+        {/* --- RIWAYAT SELESAI --- */}
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><History className="text-gray-400" size={24} /> Riwayat Selesai</h2>
         <div className="space-y-4">
             {historyJobs?.map((job) => (

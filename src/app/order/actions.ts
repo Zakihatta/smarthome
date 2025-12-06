@@ -20,6 +20,13 @@ export async function placeOrder(formData: FormData) {
   const address = formData.get('address') as string
   const notes = formData.get('notes') as string
 
+  //Koordinat
+  const latStr = formData.get('latitude') as string
+  const lngStr = formData.get('longitude') as string
+  
+  const latitude = latStr ? parseFloat(latStr) : null
+  const longitude = lngStr ? parseFloat(lngStr) : null
+
   // 3. Simpan ke database (Tabel: orders)
   const { error } = await supabase.from('orders').insert({
     user_id: user.id,
@@ -27,6 +34,8 @@ export async function placeOrder(formData: FormData) {
     total_price: Number(price), // Harga dasar (bisa dikembangkan nanti)
     status: 'pending_assignment', // Status awal
     scheduled_at: new Date(date).toISOString(),
+    latitude: latitude,   // Simpan lat
+    longitude: longitude, // Simpan lng 
     order_details: {
       address: address,
       notes: notes

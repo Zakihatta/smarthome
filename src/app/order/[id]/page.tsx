@@ -5,6 +5,7 @@ import { placeOrder } from '../actions';
 import { Calendar, MapPin, FileText, ArrowLeft, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import OrderForm from './OrderForm';
 
 // Helper Format Rupiah
 const formatRupiah = (price: number) => {
@@ -85,72 +86,12 @@ export default async function OrderDetailPage({
         <div className="bg-[#2F2F2F] p-8 rounded-3xl border border-white/5 h-fit sticky top-28">
           <h2 className="text-2xl font-bold text-white mb-6">Lengkapi Pesanan</h2>
           
-          <form action={placeOrder} className="space-y-6">
-            
-            {/* Hidden Inputs (Data yang dikirim tapi tidak diisi user) */}
-            <input type="hidden" name="serviceId" value={service.id} />
-            <input type="hidden" name="price" value={service.base_price} />
+          {/* Panggil OrderForm Client Component */}
+          <OrderForm 
+             serviceId={service.id} 
+             basePrice={service.base_price} 
+          />
 
-            {/* Tanggal Pengerjaan */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                <Calendar size={16} /> Tanggal & Waktu
-              </label>
-              <input 
-                type="datetime-local" 
-                name="date"
-                required
-                className="w-full bg-[#212121] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary"
-              />
-            </div>
-
-            {/* Alamat */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                <MapPin size={16} /> Alamat Lengkap
-              </label>
-              <textarea 
-                name="address"
-                required
-                rows={3}
-                placeholder="Jl. Mawar No. 12, Jakarta Selatan..."
-                className="w-full bg-[#212121] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary resize-none"
-              />
-            </div>
-
-            {/* Catatan */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
-                <FileText size={16} /> Catatan Tambahan (Opsional)
-              </label>
-              <textarea 
-                name="notes"
-                rows={2}
-                placeholder="Contoh: Pagar warna hitam, atau tolong bawa tangga..."
-                className="w-full bg-[#212121] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary resize-none"
-              />
-            </div>
-
-            {/* Total Harga */}
-            <div className="pt-6 border-t border-white/10 flex items-center justify-between">
-              <span className="text-gray-400">Estimasi Harga</span>
-              <span className="text-2xl font-bold text-primary">
-                {formatRupiah(service.base_price)}
-              </span>
-            </div>
-
-            {/* Tombol Submit */}
-            <button 
-              type="submit"
-              className="w-full bg-primary text-background font-bold py-4 rounded-xl hover:bg-primary-dark transition-all hover:scale-[1.02] shadow-lg"
-            >
-              Konfirmasi Pesanan
-            </button>
-            <p className="text-xs text-center text-gray-500 mt-2">
-              Pembayaran dilakukan setelah pekerjaan selesai.
-            </p>
-
-          </form>
         </div>
 
       </div>
